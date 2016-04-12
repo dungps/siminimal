@@ -4,8 +4,8 @@ var config = {
 		port: '8080'
 	},
 	site: {
-		title: 'DungPS',
-		name: 'DungPs',
+		title: 'Siminimal',
+		name: 'Siminimal',
 		url: 'http://10.0.1.197:8080',
 		description: 'Description',
 		author: 'DungPS'
