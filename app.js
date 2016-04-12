@@ -5,6 +5,7 @@ var pt 		= require('path');
 var fs 		= require('fs');
 var config	= require('./config');
 var marked	= require('marked');
+var _		= require('lodash');
 var extractor = require('file-extractor');
 var	app 	= express();
 
@@ -12,7 +13,7 @@ function locate(path) {
 	return pt.join(__dirname, path);
 }
 
-function get_posts(page) {
+function get_posts(page, cb) {
 	if ( page == null ) {
 		page = 1;
 	}
@@ -21,20 +22,55 @@ function get_posts(page) {
 	var limit = offset + config.options.posts_per_page;
 
 	fs.readdir(locate('content/post'), function(err,items){
-		for( var i = offset; i < limit; i++ ) {
-			if ( typeof items[i] !== 'undefined' ) {
-				get_post(locate('content/post/'+items[i]));
+		var posts = [];
+		if ( err !== false && typeof items != 'null' ) {
+			for( var i = offset; i < limit; i++ ) {
+				if ( typeof items[i] !== 'undefined' ) {
+					post = get_post(locate('content/post/'+items[i]));
+					posts.push(post);
+				}
 			}
 		}
-	})
+
+		if ( cb ) {
+			cb(posts);
+		}
+	});
 }
 
 function get_post(path) {
-	var result = [];
+	var result = {};
 	var content = fs.readFileSync(path,'utf-8');
-	extractor().matches(/-{3}data\n?([\s\S]*)-{3}/m, function(m){
-		console.log(m);
-	}).start(content);
+
+	var get_info = function(type) {
+		var r = /-{3}data\n?([\s\S]*)-{3}/m;
+		var r_info = new RegExp(type+": (.+)", 'g' );
+		var content_data = content.match(r);
+		var info = content_data[1].match(r_info);
+		if ( info ) {
+			split = _.split(info[0], ': ');
+			return split[1];
+		} else {
+			return '';
+		}
+	}
+
+	var get_content = function() {
+		var r = /\n\n([\s\S]*)/g;
+		var content_data = content.match(r);
+		return md_to_html(content_data[0]);
+	}
+
+	get_content();
+	
+	var result = {
+		title: get_info('title'),
+		author: get_info('author'),
+		date: get_info('date'),
+		content: get_content()
+	};
+
+	return result;
 }
 
 function home(path) {
@@ -96,10 +132,21 @@ app.set('view engine', 'hbs');
 app.set('views', locate('views'));
 
 app.get('/',function(req,res,next){
-	res.render('index', {
-		site: config.site,
-		posts: test_data
-	})
+	get_posts(1, function(posts){
+		res.render('index', {
+			site: config.site,
+			posts: posts
+		});
+	});
+})
+
+app.get('/paged/:paged',function(req,res,next){
+	get_posts(req.params.paged, function(posts){
+		res.render('index', {
+			site: config.site,
+			posts: posts
+		});
+	});
 })
 
 app.get('/:post', function(req,res,next){
