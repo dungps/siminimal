@@ -1,12 +1,12 @@
 var config = {
 	server: {
-		host: '10.0.1.197',
-		port: '8080'
+		host: 'siminimal.herokuapp.com',
+		port: '80'
 	},
 	site: {
 		title: 'Siminimal',
 		name: 'Siminimal',
-		url: 'http://10.0.1.197:8080',
+		url: 'https://siminimal.herokuapp.com',
 		description: 'Description',
 		author: 'DungPS'
 	},
