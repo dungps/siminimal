@@ -1,0 +1,22 @@
+{{#if posts}}
+<main id="main" class="site-main" role="main">
+	{{#foreach posts}}
+		<article id="post" class="post hentry">
+			<header class="entry-header">
+				<div class="entry-meta">
+					<span class="posted-on">{{date}}</span>
+				</div>
+				<h2 class="entry-title">
+					<a href="{{url}}">{{title}}</a>
+				</h2>
+			</header>
+			{{#if thumb}}
+				<div class="entry-thumbnail"><img src="{{thumb}}"></div>
+			{{/if}}
+			<div class="entry-content">
+				<p>{{content}}</p>
+			</div>
+		</article>
+	{{/foreach}}
+</main>
+{{/if}}

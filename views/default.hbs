@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+{{> "head"}}
+</head>
+<body>
+<div id="page" class="hfeed site">
+	<header id="masthead" class="site-header" role="banner" style="background-image: url({{assets "/img/header.jpg"}})">
+		<button type="button" data-toggle="offcanvas" class="navbar-toggle" data-target=".navmenu" data-canvas="body">
+			<span class="sr-only">Toggle Sidebar</span>
+		</button>
+		<div class="site-title">
+			<div class="site-title-inner">
+				<a href="{{site.url}}" rel="home" class="site-brand">
+					{{#if site.logo}}
+						<img title="{{site.name}}" src="{{site.logo}}">
+					{{/if}}
+					{{#if post}}
+						<h1>{{post.title}}</h1>
+					{{else}}
+						<h1>{{site.name}}</h1>
+					{{/if}}
+					{{#if post}}
+					<div class="entry-meta">
+						<span class="posted-on">
+							<a href="{{post.url}}">
+								<time class="entry-date published updated">{{post.date}}</time>
+							</a>
+						</span>
+					</div>
+					{{else}}
+					<p>{{site.description}}</p>
+					{{/if}}
+				</a>
+			</div>
+		</div>
+	</header>
+	<div id="content-wrapper" class="site-content-wrapper">
+		<div id="primary" class="content-area">
+			{{{body}}}
+		</div>
+	</div>
+</div>	
+{{> "footer"}}
+</body>
+</html>
