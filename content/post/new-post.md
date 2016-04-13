@@ -1,12 +1,9 @@
----data
 title: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 author: dungps
 date: April 13, 2016
 description: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 keywords: ruby, rails
----
-
-
+<!--content-->
 ### Install RVM
 Open Terminal and run this command:
 

@@ -42,24 +42,17 @@ function get_posts(page, cb) {
 function parse_content(path) {
 	var result = {};
 	var content = fs.readFileSync(path,{encoding: 'utf8'});
-
+	content = _.split(content, '<!--content-->');
+	
 	var get_info = function(type) {
-		var r = /-{3}data\n?([\s\S]*)-{3}/m;
 		var r_info = new RegExp(type+": (.+)", 'g' );
-		var content_data = content.match(r);
-		var info = content_data[1].match(r_info);
+		var info = content[0].match(r_info);
 		if ( info ) {
 			split = _.split(info[0], ': ');
 			return split[1];
 		} else {
 			return '';
 		}
-	}
-
-	var get_content = function() {
-		var r = /\n\n([\s\S]*)/g;
-		var content_data = content.match(r);
-		return md_to_html(content_data[0]);
 	}
 	
 	var result = {
@@ -71,7 +64,7 @@ function parse_content(path) {
 		description: get_info('description'),
 		excerpt: get_info('excerpt'),
 		url: 'article/'+pt.basename(path,'.md'),
-		content: get_content()
+		content: md_to_html(content[1])
 	};
 
 	return result;
@@ -155,10 +148,11 @@ app.get('/article/:post', function(req,res,next){
 
 app.get('/:page', function(req,res,next){
 	var file_path = locate('content/page/' + req.params.page + '.md' );
+	console.log(file_path);
 	if ( fs.existsSync( file_path ) ) {
 		res.render('page', {
 			site: config.site,
-			post: parse_content( locate('content/page/' + req.params.page + '.md' ) )
+			page: parse_content( locate('content/page/' + req.params.page + '.md' ) )
 		});
 	} else {
 		res.status('404').render('404');
