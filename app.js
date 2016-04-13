@@ -1,44 +1,60 @@
-var express = require( 'express' );
-var	http 	= require( 'http' );
+var express = require('express');
+var	http 	= require('http');
 var hbs 	= require('express-hbs');
 var pt 		= require('path');
 var fs 		= require('fs');
-var config	= require('./config');
 var marked	= require('marked');
 var _		= require('lodash');
 var url		= require('url');
-var hbsUtils= hbs.handlebars.Utils;
+
+var config	= require('./config');
+
 var	app 	= express();
 
+// File locate
 function locate(path) {
 	return pt.join(__dirname, path);
 }
 
-function get_posts(page, cb) {
-	if ( page == null ) {
-		page = 1;
+// get all posts
+function get_posts(paged) {
+	if ( paged == null ) {
+		paged = 1;
 	}
 
-	var offset = ( page - 1 ) * config.options.posts_per_page;
+	var offset = ( paged - 1 ) * config.options.posts_per_page;
 	var limit = offset + config.options.posts_per_page;
-
-	fs.readdir(locate('content/post'), function(err,items){
-		var posts = [];
-		if ( err !== false && typeof items != 'null' ) {
-			for( var i = offset; i < limit; i++ ) {
-				if ( typeof items[i] !== 'undefined' ) {
-					post = parse_content(locate('content/post/'+items[i]));
-					posts.push(post);
-				}
-			}
+	var files = fs.readdirSync(locate('content/post'));
+	var posts = [];
+	for (var i = offset; i < limit; i++) {
+		if ( files[i] ) {
+			post = parse_content(locate('content/post/'+files[i]));
+			posts.push(post);
 		}
+	}
 
-		if ( cb ) {
-			cb(posts);
-		}
-	});
+	return posts;
 }
 
+function get_navigation() {
+	var defaults = [
+		{
+			label: "Home",
+			url: home()
+		}
+	];
+
+	var get_pages = function() {
+		var pages = fs.readdirSync(locate('content/page'));
+		for(var i = 0; i < pages.length; i++) {
+			if ( files[i] ) {
+				page = parse_content(locate('content/page/'+files[i]));
+			}
+		}
+	}
+}
+
+// parse content
 function parse_content(path) {
 	var result = {};
 	var content = fs.readFileSync(path,{encoding: 'utf8'});
@@ -70,6 +86,7 @@ function parse_content(path) {
 	return result;
 }
 
+// convert markdown to html
 function md_to_html(content) {
 	marked.setOptions({
 		highlight: function(code, lang, callback){
@@ -80,6 +97,7 @@ function md_to_html(content) {
 	return marked(content);
 }
 
+// helper url
 function home(path) {
 	var home = config.site.url;
 	if ( path ) {
@@ -89,6 +107,7 @@ function home(path) {
 	return home;
 }
 
+// register foreach helper for handlebars
 hbs.registerHelper('foreach', function(items, options){
 	var ret = '';
 	for(var i=0; i<items.length; i++) {
@@ -97,10 +116,12 @@ hbs.registerHelper('foreach', function(items, options){
 	return ret;
 });
 
+// register assets helper for handlebars
 hbs.registerHelper('assets', function(path, options){
 	return home(path);
 });
 
+// safestring for content
 hbs.registerHelper('content', function(options){
 	return new hbs.handlebars.SafeString(this.content);
 })
@@ -116,21 +137,16 @@ app.set('view engine', 'hbs');
 app.set('views', locate('views'));
 
 app.get('/',function(req,res,next){
-	res.type('html');
-	get_posts(1, function(posts){
-		res.render('index', {
-			site: config.site,
-			posts: posts
-		});
+	res.render('index', {
+		site: config.site,
+		posts: get_posts(1)
 	});
 })
 
 app.get('/paged/:paged',function(req,res,next){
-	get_posts(req.params.paged, function(posts){
-		res.render('index', {
-			site: config.site,
-			posts: posts
-		});
+	res.render('index', {
+		site: config.site,
+		posts: get_posts(req.params.paged)
 	});
 })
 
@@ -148,7 +164,6 @@ app.get('/article/:post', function(req,res,next){
 
 app.get('/:page', function(req,res,next){
 	var file_path = locate('content/page/' + req.params.page + '.md' );
-	console.log(file_path);
 	if ( fs.existsSync( file_path ) ) {
 		res.render('page', {
 			site: config.site,
