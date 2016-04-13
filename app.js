@@ -27,7 +27,7 @@ function get_posts(page, cb) {
 		if ( err !== false && typeof items != 'null' ) {
 			for( var i = offset; i < limit; i++ ) {
 				if ( typeof items[i] !== 'undefined' ) {
-					post = get_post(locate('content/post/'+items[i]));
+					post = parse_content(locate('content/post/'+items[i]));
 					posts.push(post);
 				}
 			}
@@ -39,9 +39,9 @@ function get_posts(page, cb) {
 	});
 }
 
-function get_post(path) {
+function parse_content(path) {
 	var result = {};
-	var content = fs.readFileSync(path,'utf-8');
+	var content = fs.readFileSync(path,{encoding: 'utf8'});
 
 	var get_info = function(type) {
 		var r = /-{3}data\n?([\s\S]*)-{3}/m;
@@ -59,7 +59,7 @@ function get_post(path) {
 	var get_content = function() {
 		var r = /\n\n([\s\S]*)/g;
 		var content_data = content.match(r);
-		return marked(content_data[0]);
+		return md_to_html(content_data[0]);
 	}
 	
 	var result = {
@@ -69,11 +69,22 @@ function get_post(path) {
 		keywords: get_info('keywords'),
 		thumb: get_info('thumb'),
 		description: get_info('description'),
-		url: '/'+pt.basename(path,'.md'),
+		excerpt: get_info('excerpt'),
+		url: 'article/'+pt.basename(path,'.md'),
 		content: get_content()
 	};
 
 	return result;
+}
+
+function md_to_html(content) {
+	marked.setOptions({
+		highlight: function(code, lang, callback){
+			return require('highlight.js').highlightAuto(code).value;
+		}
+	})
+
+	return marked(content);
 }
 
 function home(path) {
@@ -119,7 +130,6 @@ app.get('/',function(req,res,next){
 			posts: posts
 		});
 	});
-	console.log(res.locals);
 })
 
 app.get('/paged/:paged',function(req,res,next){
@@ -131,12 +141,28 @@ app.get('/paged/:paged',function(req,res,next){
 	});
 })
 
-app.get('/:post', function(req,res,next){
+app.get('/article/:post', function(req,res,next){
 	var file_path = locate( 'content/post/' + req.params.post + '.md' );
-	res.render('post', {
-		site: config.site,
-		post: get_post(file_path)
-	});
+	if ( fs.existsSync(file_path) ) {
+		res.render('post', {
+			site: config.site,
+			post: parse_content(file_path)
+		});
+	} else {
+		res.status('404').render('404');
+	}
+});
+
+app.get('/:page', function(req,res,next){
+	var file_path = locate('content/page/' + req.params.page + '.md' );
+	if ( fs.existsSync( file_path ) ) {
+		res.render('page', {
+			site: config.site,
+			post: parse_content( locate('content/page/' + req.params.page + '.md' ) )
+		});
+	} else {
+		res.status('404').render('404');
+	}
 });
 
 app.get('/admin', function(req,res,next){

@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "express-hbs": "^0.8.4",
+    "highlight.js": "^9.3.0",
     "lodash": "^4.10.0",
     "marked": "^0.3.5",
     "url": "^0.11.0"
