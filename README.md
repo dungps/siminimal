@@ -1,2 +1,2 @@
 # Siminimal
-Just a blogging platform.
+Simple Minimal Blogging Platform built with NodeJS. No database required. Markdown supports.
