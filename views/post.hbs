@@ -1,11 +1,13 @@
 {{!< default}}
 
 {{#if post}}
+{{#post}}
 <main id="main" class="site-main" role="main">
 	<article class="post hentry">
-		<div class="entry-content">{{post.content}}</div>
+		<div class="entry-content">{{content}}</div>
 	</article>
 </main>
+{{/post}}
 {{else}}
 	{{> "content-none"}}
 {{/if}}

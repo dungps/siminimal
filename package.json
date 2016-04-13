@@ -1,28 +1,23 @@
 {
-  "name": "oryc-blog",
-  "description": "learn about nodejs",
-  "version": "1.0.0",
+  "name": "siminimal",
+  "description": "Just a blogging platform.",
+  "version": "0.0.1",
   "author": "DungPS",
   "author_name": "Pham Sy Dung",
   "homepage": "",
+  "keywords": [
+    "blog",
+    "simple",
+    "minimal",
+    "cms"
+  ],
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/oryc9x/siminimal"
   },
-  "bugs": {
-    "url": ""
-  },
-  "licenses": [
-    {
-      "type": "GPL-3.0+",
-      "url": "http://www.gnu.org/licenses/gpl-3.0-standalone.html"
-    }
-  ],
-  "readme": [
-    {
-      "url": "readme.md"
-    }
-  ],
+  "bugs": "https://github.com/oryc9x/siminimal/issues",
+  "contributors": "https://github.com/oryc9x/siminimal/graphs/contributors",
+  "licenses": "MIT",
   "scripts": {
     "start": "node app.js"
   },
@@ -35,9 +30,8 @@
   },
   "dependencies": {
     "express-hbs": "^0.8.4",
-    "file-extractor": "^0.6.1",
     "lodash": "^4.10.0",
     "marked": "^0.3.5",
-    "regex": "^0.1.1"
+    "url": "^0.11.0"
   }
 }

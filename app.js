@@ -6,7 +6,8 @@ var fs 		= require('fs');
 var config	= require('./config');
 var marked	= require('marked');
 var _		= require('lodash');
-var extractor = require('file-extractor');
+var url		= require('url');
+var hbsUtils= hbs.handlebars.Utils;
 var	app 	= express();
 
 function locate(path) {
@@ -58,15 +59,17 @@ function get_post(path) {
 	var get_content = function() {
 		var r = /\n\n([\s\S]*)/g;
 		var content_data = content.match(r);
-		return md_to_html(content_data[0]);
+		return marked(content_data[0]);
 	}
-
-	get_content();
 	
 	var result = {
 		title: get_info('title'),
 		author: get_info('author'),
 		date: get_info('date'),
+		keywords: get_info('keywords'),
+		thumb: get_info('thumb'),
+		description: get_info('description'),
+		url: '/'+pt.basename(path,'.md'),
 		content: get_content()
 	};
 
@@ -76,55 +79,32 @@ function get_post(path) {
 function home(path) {
 	var home = config.site.url;
 	if ( path ) {
-		home = home + path;
+		home = url.resolve(home,path);
 	}
 
 	return home;
 }
 
-function md_to_html(content) {
-	marked.setOptions({
-		renderer: new marked.Renderer(),
-		gfm: true,
-		tables: true,
-		breaks: false,
-		pedantic: false,
-		sanitize: true,
-		smartLists: true,
-		smartypants: false
-	});
-
-	return marked(content);
-}
-
-var test_data = [
-	{
-		title: "bài 1",
-		content: "bài 1"
-	},
-	{
-		title: 'bai 2',
-		content: 'bai 2'
-	}
-];
-
-
 hbs.registerHelper('foreach', function(items, options){
-	var out = '';
+	var ret = '';
 	for(var i=0; i<items.length; i++) {
-		out = out + options.fn(items[i]);
+		ret = ret + options.fn(items[i]);
 	}
-	return out;
+	return ret;
 });
 
 hbs.registerHelper('assets', function(path, options){
 	return home(path);
 });
 
+hbs.registerHelper('content', function(options){
+	return new hbs.handlebars.SafeString(this.content);
+})
+
 app.use(express.static(locate('assets')));
 
 app.engine('hbs', hbs.express4({
-	partialsDir: locate('views/inc'),
+	partialsDir: locate('views/partials'),
 	defaultLayout: locate('views/default.hbs')
 }));
 
@@ -132,12 +112,14 @@ app.set('view engine', 'hbs');
 app.set('views', locate('views'));
 
 app.get('/',function(req,res,next){
+	res.type('html');
 	get_posts(1, function(posts){
 		res.render('index', {
 			site: config.site,
 			posts: posts
 		});
 	});
+	console.log(res.locals);
 })
 
 app.get('/paged/:paged',function(req,res,next){
@@ -150,11 +132,10 @@ app.get('/paged/:paged',function(req,res,next){
 })
 
 app.get('/:post', function(req,res,next){
+	var file_path = locate( 'content/post/' + req.params.post + '.md' );
 	res.render('post', {
-		post: {
-			title: 'test',
-			content: 'test'
-		}
+		site: config.site,
+		post: get_post(file_path)
 	});
 });
 

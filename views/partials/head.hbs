@@ -1,0 +1,19 @@
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>{{#if post.title}}{{post.title}}{{else}}{{site.title}}{{/if}}</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="{{#if post.description}}{{post.description}}{{else}}{{site.description}}{{/if}}">
+	{{#if site.author}}<meta name="author" content="{{site.author}}">{{/if}}
+	<meta name="keywords" content="{{#if post.keywords}}{{post.keywords}}{{else}}{{site.keywords}}{{/if}}">
+
+	<link rel="stylesheet" type="text/css" href="/css/style.css">
+
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+	<meta property="og:title" content="{{#if post.title}}{{post.title}}{{else}}{{site.title}}{{/if}}">
+	<meta property="og:description" content="{{#if post.description}}{{post.description}}{{else}}{{site.description}}{{/if}}">
+	<meta property="og:url" content="{{site.url}}{{post.url}}">
+	<meta property="og:site_name" content="{{site.title}}">
+	<meta property="og:image" content="{{#if post.thumb}}{{post.thumb}}{{else}}{{site.logo}}{{/if}}">
+</head>

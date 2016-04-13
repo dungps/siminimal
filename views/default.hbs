@@ -11,7 +11,7 @@
 		</button>
 		<div class="site-title">
 			<div class="site-title-inner">
-				<a href="{{site.url}}" rel="home" class="site-brand">
+				<a href="{{#if post.url}}{{post.url}}{{else}}{{site.url}}{{/if}}" rel="home" class="site-brand">
 					{{#if site.logo}}
 						<img title="{{site.name}}" src="{{site.logo}}">
 					{{/if}}

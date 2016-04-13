@@ -1,10 +1,13 @@
 ---data
 title: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 author: dungps
+date: April 13, 2016
+description: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+keywords: ruby, rails
 ---
 
 
-###Install RVM
+### Install RVM
 Open Terminal and run this command:
 
 ```bash
@@ -30,7 +33,7 @@ You can check rvm version with command
 rvm -v
 ```
 
-###Install Ruby
+### Install Ruby
 Run command:
 
 ```bash
@@ -54,7 +57,7 @@ You can check ruby version with command:
 ruby -v
 ```
 
-###Install Ruby on Rails
+### Install Ruby on Rails
 Run command:
 
 ```bash
