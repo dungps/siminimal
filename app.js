@@ -37,21 +37,34 @@ function get_posts(paged) {
 }
 
 function get_navigation() {
-	var defaults = [
+	var nav = [
 		{
 			label: "Home",
 			url: home()
 		}
 	];
 
-	var get_pages = function() {
-		var pages = fs.readdirSync(locate('content/page'));
-		for(var i = 0; i < pages.length; i++) {
-			if ( files[i] ) {
-				page = parse_content(locate('content/page/'+files[i]));
-			}
+	var pages = fs.readdirSync(locate('content/page'));
+	var limit = pages.length;
+	for(var i = 0; i < limit; i++) {
+		if ( pages[i] ) {
+			page = parse_content(locate('content/page/'+pages[i]));
+			var object = {};
+			_.each(page, function(v, k){
+				if ( k == 'title' ) {
+					object['label'] = v;
+				}
+
+				if ( k == 'filename' ) {
+					object['url'] = home(v);
+				}
+			})
+
+			nav.push(object);
 		}
 	}
+
+	return nav;
 }
 
 // parse content
@@ -80,6 +93,7 @@ function parse_content(path) {
 		description: get_info('description'),
 		excerpt: get_info('excerpt'),
 		url: 'article/'+pt.basename(path,'.md'),
+		filename: pt.basename(path,'.md'),
 		content: md_to_html(content[1])
 	};
 
@@ -139,6 +153,7 @@ app.set('views', locate('views'));
 app.get('/',function(req,res,next){
 	res.render('index', {
 		site: config.site,
+		navigation: get_navigation(),
 		posts: get_posts(1)
 	});
 })
@@ -146,6 +161,7 @@ app.get('/',function(req,res,next){
 app.get('/paged/:paged',function(req,res,next){
 	res.render('index', {
 		site: config.site,
+		navigation: get_navigation(),
 		posts: get_posts(req.params.paged)
 	});
 })
@@ -155,6 +171,7 @@ app.get('/article/:post', function(req,res,next){
 	if ( fs.existsSync(file_path) ) {
 		res.render('post', {
 			site: config.site,
+			navigation: get_navigation(),
 			post: parse_content(file_path)
 		});
 	} else {
@@ -167,6 +184,7 @@ app.get('/:page', function(req,res,next){
 	if ( fs.existsSync( file_path ) ) {
 		res.render('page', {
 			site: config.site,
+			navigation: get_navigation(),
 			page: parse_content( locate('content/page/' + req.params.page + '.md' ) )
 		});
 	} else {

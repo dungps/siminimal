@@ -8,6 +8,7 @@
 	<header id="masthead" class="site-header" role="banner" style="background-image: url({{assets "/img/header.jpg"}})">
 		<button type="button" data-toggle="offcanvas" class="navbar-toggle" data-target=".navmenu" data-canvas="body">
 			<span class="sr-only">Toggle Sidebar</span>
+			<i class="fa fa-bars"></i>
 		</button>
 		<div class="site-title">
 			<div class="site-title-inner">
@@ -34,6 +35,7 @@
 				</a>
 			</div>
 		</div>
+		<div class="header-overlay" style="opacity: 0.3; background: #006cff"></div>
 	</header>
 	<div id="content-wrapper" class="site-content-wrapper">
 		<div id="primary" class="content-area">
@@ -46,6 +48,11 @@
 				<a href="#primary" class="smooth-scroll back-to-top"><i class="fa fa-angle-up"></i></a>
 			</footer>
 		</div>
+	</div>
+	<div id="secondary" class="widget-area navmenu navmenu-inverse navmenu-fixed-left offcanvas" role="complementary">
+		<aside class="widget widget_nav_menu">
+			{{> "navigations"}}
+		</aside>
 	</div>
 </div>	
 {{> "footer"}}

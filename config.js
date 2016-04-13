@@ -9,8 +9,9 @@ var config = {
 		url: 'http://10.0.1.197:8080',
 		description: 'Simple Minimal Blogging Platform built with NodeJS. No database required. Markdown supports.',
 		author: 'DungPS',
-		keywords: "siminimal, blog, cms, simple, minimal"
-	},
+		keywords: "siminimal, blog, cms, simple, minimal",
+		logo: '/img/logo.png'
+	}
 	options: {
 		posts_per_page: 5
 	}
