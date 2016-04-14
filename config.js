@@ -11,9 +11,9 @@ var config = {
 		author: 'DungPS',
 		keywords: "siminimal, blog, cms, simple, minimal",
 		logo: '/img/logo.png'
-	}
+	},
 	options: {
-		posts_per_page: 5
+		posts_per_page: 2
 	}
 }
 

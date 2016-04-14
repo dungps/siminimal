@@ -22,9 +22,22 @@ function get_posts(paged) {
 		paged = 1;
 	}
 
+	var sort_date = function(a,b) {
+		aSplit = _.split(a,'-');
+		bSplit = _.split(b,'-');
+
+		aDate = aSplit[0] + '-' + aSplit[1] + '-' + aSplit[2];
+		bDate = bSplit[0] + '-' + bSplit[1] + '-' + bSplit[2];
+		aDate = Date.parse(aDate);
+		bDate = Date.parse(bDate);
+
+		return ( aDate > bDate ) ? -1 : ( aDate < bDate ? 1 : 0 );
+	}
+
 	var offset = ( paged - 1 ) * config.options.posts_per_page;
 	var limit = offset + config.options.posts_per_page;
 	var files = fs.readdirSync(locate('content/post'));
+	files.sort(sort_date);
 	var posts = [];
 	for (var i = offset; i < limit; i++) {
 		if ( files[i] ) {
@@ -39,7 +52,7 @@ function get_posts(paged) {
 function get_navigation() {
 	var nav = [
 		{
-			label: "Home",
+			title: "Home",
 			url: home()
 		}
 	];
@@ -48,19 +61,8 @@ function get_navigation() {
 	var limit = pages.length;
 	for(var i = 0; i < limit; i++) {
 		if ( pages[i] ) {
-			page = parse_content(locate('content/page/'+pages[i]));
-			var object = {};
-			_.each(page, function(v, k){
-				if ( k == 'title' ) {
-					object['label'] = v;
-				}
-
-				if ( k == 'filename' ) {
-					object['url'] = home(v);
-				}
-			})
-
-			nav.push(object);
+			page = parse_content(locate('content/page/'+pages[i]),'page');
+			nav.push(page);
 		}
 	}
 
@@ -68,7 +70,10 @@ function get_navigation() {
 }
 
 // parse content
-function parse_content(path) {
+function parse_content(path,type) {
+	if ( type == null ) {
+		type = 'post';
+	}
 	var result = {};
 	var content = fs.readFileSync(path,{encoding: 'utf8'});
 	content = _.split(content, '<!--content-->');
@@ -83,8 +88,18 @@ function parse_content(path) {
 			return '';
 		}
 	}
-	
-	var result = {
+
+	var filename = pt.basename(path,'.md');
+	if ( type === 'post' ) {
+		var filePath = _.split(filename, '-');
+		var name = _.slice(filePath, 3);
+		name = _.join(name,'-');
+		var url = '/' + filePath[0] + '/' + filePath[1] + '/' + filePath[2] + '/' + name;
+	} else {
+		url = '/' + filename;
+	}
+
+	result = {
 		title: get_info('title'),
 		author: get_info('author'),
 		date: get_info('date'),
@@ -92,8 +107,8 @@ function parse_content(path) {
 		thumb: get_info('thumb'),
 		description: get_info('description'),
 		excerpt: get_info('excerpt'),
-		url: 'article/'+pt.basename(path,'.md'),
-		filename: pt.basename(path,'.md'),
+		url: url,
+		filename: filename,
 		content: md_to_html(content[1])
 	};
 
@@ -140,6 +155,15 @@ hbs.registerHelper('content', function(options){
 	return new hbs.handlebars.SafeString(this.content);
 })
 
+// safestring for title
+hbs.registerHelper('title', function(options){
+	return new hbs.handlebars.SafeString(this.title);
+})
+
+hbs.registerHelper('pagination', function(options){
+
+})
+
 app.use(express.static(locate('assets')));
 
 app.engine('hbs', hbs.express4({
@@ -154,25 +178,28 @@ app.get('/',function(req,res,next){
 	res.render('index', {
 		site: config.site,
 		navigation: get_navigation(),
-		posts: get_posts(1)
+		posts: get_posts(1),
+		is_front_page: true
 	});
 })
 
-app.get('/paged/:paged',function(req,res,next){
+app.get('/page/:paged',function(req,res,next){
 	res.render('index', {
 		site: config.site,
 		navigation: get_navigation(),
-		posts: get_posts(req.params.paged)
+		posts: get_posts(req.params.paged),
+		is_front_page: true
 	});
 })
 
-app.get('/article/:post', function(req,res,next){
-	var file_path = locate( 'content/post/' + req.params.post + '.md' );
+app.get('/:year/:month/:day/:post', function(req,res,next){
+	var file_path = locate( 'content/post/' + req.params.year + '-' + req.params.month + '-' + req.params.day + '-' + req.params.post + '.md' );
 	if ( fs.existsSync(file_path) ) {
 		res.render('post', {
 			site: config.site,
 			navigation: get_navigation(),
-			post: parse_content(file_path)
+			post: parse_content(file_path),
+			is_post: true
 		});
 	} else {
 		res.status('404').render('404');
@@ -185,16 +212,13 @@ app.get('/:page', function(req,res,next){
 		res.render('page', {
 			site: config.site,
 			navigation: get_navigation(),
-			page: parse_content( locate('content/page/' + req.params.page + '.md' ) )
+			page: parse_content( locate('content/page/' + req.params.page + '.md' ), 'page' ),
+			is_page: true
 		});
 	} else {
 		res.status('404').render('404');
 	}
 });
-
-app.get('/admin', function(req,res,next){
-	
-})
 
 http.createServer( app ).listen( config.server.port, config.server.host );
 
