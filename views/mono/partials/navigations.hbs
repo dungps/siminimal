@@ -1,7 +1,7 @@
 {{#if navigation}}
 	<ul id="menu-main-menu" class="nav navmenu-nav">
 		{{#foreach navigation}}
-			<li><a href="{{url}}">{{title}}</a></li>
+			<li class="{{#if current}}active{{/if}}"><a href="{{url}}">{{title}}</a></li>
 		{{/foreach}}
 	</ul>
 {{/if}}
