@@ -13,7 +13,8 @@ var config = {
 		logo: '/img/logo.png'
 	},
 	options: {
-		posts_per_page: 2
+		posts_per_page: 2,
+		theme: 'mono'
 	}
 }
 

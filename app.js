@@ -1,15 +1,16 @@
-var express = require('express');
-var	http 	= require('http');
-var hbs 	= require('express-hbs');
-var pt 		= require('path');
-var fs 		= require('fs');
-var marked	= require('marked');
-var _		= require('lodash');
-var url		= require('url');
+var express 		= require('express');
+var	http 			= require('http');
+var hbs 			= require('express-hbs');
+var pt 				= require('path');
+var fs 				= require('fs');
+var marked			= require('marked');
+var _				= require('lodash');
+var url				= require('url');
 
-var config	= require('./config');
+var config			= require('./config');
 
-var	app 	= express();
+var	app 			= express();
+var theme_locate 	= locate('views/' + config.options.theme );
 
 // File locate
 function locate(path) {
@@ -167,12 +168,12 @@ hbs.registerHelper('pagination', function(options){
 app.use(express.static(locate('assets')));
 
 app.engine('hbs', hbs.express4({
-	partialsDir: locate('views/partials'),
-	defaultLayout: locate('views/default.hbs')
+	partialsDir: theme_locate + '/partials',
+	defaultLayout: theme_locate + '/default.hbs'
 }));
 
 app.set('view engine', 'hbs');
-app.set('views', locate('views'));
+app.set('views', theme_locate);
 
 app.get('/',function(req,res,next){
 	res.render('index', {
