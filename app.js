@@ -213,7 +213,7 @@ app.get('/:page', function(req,res,next){
 		res.render('page', {
 			site: config.site,
 			navigation: get_navigation(),
-			page: parse_content( locate('content/page/' + req.params.page + '.md' ), 'page' ),
+			post: parse_content( locate('content/page/' + req.params.page + '.md' ), 'page' ),
 			is_page: true
 		});
 	} else {
