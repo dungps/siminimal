@@ -34,24 +34,41 @@ app.get('/',function(req,res,next){
 	res.render('index', {
 		site: config.site,
 		navigation: helpers.functions.get_navigation('/'),
-		posts: helpers.functions.get_posts(1),
+		posts: helpers.functions.get_posts(),
 		pagination: helpers.functions.get_pagination(1),
 		current: 'home',
 	});
+})
+
+app.get('/rss', function(req,res,next){
+	res.set({
+		'Cache-Control': 'public, max-age=3600',
+		'Content-Type': 'text/xml'
+	});
+	res.send(helpers.xml.feed.ParseIndex(helpers.functions.get_posts({nopaging:true})));
+})
+
+app.get('/sitemap.xml', function(req,res,next){
+	res.set({
+		'Cache-Control': 'public, max-age=3600',
+		'Content-Type': 'text/xml'
+	});
+	res.send(helpers.xml.sitemap.ParseIndex());
 })
 
 app.get('/page/:paged',function(req,res,next){
 	res.render('index', {
 		site: config.site,
 		navigation: helpers.functions.get_navigation('/'),
-		posts: helpers.functions.get_posts(req.params.paged),
+		posts: helpers.functions.get_posts({page:req.params.paged}),
 		pagination: helpers.functions.get_pagination(req.params.paged),
 		current: 'home',
 	});
 })
 
-app.get('/:year/:month/:day/:post', function(req,res,next){
-	var file_path = helpers.functions.locate( 'content/post/' + req.params.year + '-' + req.params.month + '-' + req.params.day + '-' + req.params.post + '.md' );
+app.get('/:year/:month/:date/:post', function(req,res,next){
+	var params = [req.params.year, req.params.month, req.params.date, req.params.post];
+	var file_path = helpers.functions.locate( 'content/post/' + params.join('-') + '.md' );
 	if ( fs.existsSync(file_path) ) {
 		res.render('post', {
 			site: config.site,

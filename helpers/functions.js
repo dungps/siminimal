@@ -8,11 +8,11 @@ var marked			= require('marked');
 var functions = {
 	// File locate
 	locate: function(path) {
-		return pt.join(__dirname, '../' + path);
+		return pt.normalize(pt.join(__dirname, '../' + path));
 	},
 
 	// convert markdown to html
-	md_to_html: function(content) {
+	render: function(content) {
 		marked.setOptions({
 			highlight: function(code, lang, callback){
 				return require('highlight.js').highlightAuto(code).value;
@@ -32,11 +32,41 @@ var functions = {
 		return home;
 	},
 
-	// get all posts
-	get_posts: function(paged) {
-		if ( paged == null ) {
-			paged = 1;
+	arrayUnique: function(array) {
+		var a = array.concat();
+		for(var i=0;i<a.length;++i) {
+			for(var j=i+1; j<a.length;++j){
+				if(a[i] === a[j]) {
+					a.splice(j--,1);
+				}
+			}
 		}
+	},
+
+	parseURL: function(file, type) {
+		var path;
+		if ( type == 'page' ) {
+			path = '/' + file;
+		} else {
+			var filePath = _.split(file, '-');
+			var name = _.slice(filePath, 3);
+			name = _.join(name,'-');
+			path = '/' + filePath[0] + '/' + filePath[1] + '/' + filePath[2] + '/' + name;
+		}
+
+		return path;
+	},
+
+	// get all posts
+	get_posts: function(args) {
+		var defaults = {
+			paged: 1,
+			limit: config.options.posts_per_page,
+			nopaging: false
+		}
+		var offset, limit;
+
+		args = _.assignIn(defaults,args);
 
 		var sort_date = function(a,b) {
 			aSplit = _.split(a,'-');
@@ -50,13 +80,20 @@ var functions = {
 			return ( aDate > bDate ) ? -1 : ( aDate < bDate ? 1 : 0 );
 		}
 
-		var offset = ( paged - 1 ) * config.options.posts_per_page;
-		var limit = offset + config.options.posts_per_page;
 		var files = fs.readdirSync(this.locate('content/post'));
 		files.sort(sort_date);
+
+		if ( !args.nopaging ) {
+			offset = (args.paged - 1) * args.limit;
+			limit = offset + args.limit;
+		} else {
+			offset = 0;
+			limit = files.length;
+		}
+
 		var posts = [];
 		for (var i = offset; i < limit; i++) {
-			if ( files[i] ) {
+			if ( files[i] && '.md' === pt.extname(files[i]) ) {
 				post = this.parse_content(this.locate('content/post/'+files[i]));
 				posts.push(post);
 			}
@@ -86,15 +123,7 @@ var functions = {
 		}
 
 		var filename = pt.basename(path,'.md');
-		if ( type === 'post' ) {
-			var filePath = _.split(filename, '-');
-			var name = _.slice(filePath, 3);
-			name = _.join(name,'-');
-			var url = '/' + filePath[0] + '/' + filePath[1] + '/' + filePath[2] + '/' + name;
-		} else {
-			url = '/' + filename;
-		}
-
+		var url = this.parseURL(filename,type);
 		result = {
 			title: get_info('title'),
 			author: get_info('author'),
@@ -105,17 +134,24 @@ var functions = {
 			excerpt: get_info('excerpt'),
 			url: url,
 			filename: filename,
-			content: this.md_to_html(content[1])
+			content: this.render(content[1])
 		};
 
 		return result;
 	},
 
-	get_pagination: function(current_page) {
+	get_pagination: function(args) {
 		var totalItems = fs.readdirSync(this.locate('content/post')).length;
+		var defaults = {
+			page: 1,
+			limit: config.options.posts_per_page
+		}
+
+		args = _.assignIn(defaults,args);
+
 		var pagination = {
-			page: parseInt( current_page ),
-			limit: config.options.posts_per_page,
+			page: parseInt( args.page ),
+			limit: args.limit,
 			pages: Math.ceil( totalItems / config.options.posts_per_page ),
 			total: totalItems,
 			next: null,
@@ -154,7 +190,7 @@ var functions = {
 		var pages = fs.readdirSync(this.locate('content/page'));
 		var limit = pages.length;
 		for(var i = 0; i < limit; i++) {
-			if ( pages[i] ) {
+			if ( pages[i] && '.md' === pt.extname(pages[i]) ) {
 				page = this.parse_content(this.locate('content/page/'+pages[i]),'page');
 				page['current'] = relativeUrl === page['url'];
 				nav.push(page);
