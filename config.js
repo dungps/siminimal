@@ -9,7 +9,7 @@ var config = {
 		url: 'http://dungps.herokuapp.com',
 		description: 'Simple Minimal Blogging Platform built with NodeJS. No database required. Markdown supports.',
 		author: 'DungPS',
-		keywords: "dungps, oryc, blog, wordpress, nodejs"
+		keywords: "dungps, oryc, dung, blog, wordpress, nodejs"
 	},
 	options: {
 		posts_per_page: 5,
