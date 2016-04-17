@@ -1,12 +1,12 @@
 var config = {
 	server: {
-		host: 'localhost',
-		port: '8080'
+		host: '0.0.0.0',
+		port: process.env.PORT
 	},
 	site: {
 		title: 'Siminimal',
 		name: 'Siminimal',
-		url: 'http://localhost:8080',
+		url: 'http://dungps.herokuapp.com',
 		description: 'Simple Minimal Blogging Platform built with NodeJS. No database required. Markdown supports.',
 		author: 'DungPS',
 		keywords: "siminimal, blog, cms, simple, minimal"
